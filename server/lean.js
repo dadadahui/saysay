@@ -1,6 +1,4 @@
-// var AV = require ('leancloud-storage')
 var AV = require ('leanengine')
-// import AV from 'leanengine'
 
 AV.init({
   appId: process.env.LEANCLOUD_APP_ID || 'nhKwEEEgzby6qiIn3Far8LoC-gzGzoHsz',
@@ -10,4 +8,3 @@ AV.init({
 
 
 module.exports= AV;
-

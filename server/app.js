@@ -3,11 +3,8 @@
  */
 
 const express = require('express');
-const config = require ('../config/index');
 const bodyParser = require('body-parser');
-const connect = require('connect');
 const AV = require('./lean');
-
 
 const app = express();
 //设置跨域访问
@@ -19,10 +16,10 @@ app.all('*', function(req, res, next) {
   res.header("Content-Type", "application/json;charset=utf-8");
   next();
 });
-app.use(connect(AV.express()))
-// app.use(bodyParser.urlencoded({ extended: false }))
+app.use(AV.express());
+app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.use(connect(AV.Cloud.CookieSession({ secret: 'saysecret', maxAge: 3600000, fetchUser: false })))
+app.use(AV.Cloud.CookieSession({ secret: 'saysecret', maxAge: 3600000, fetchUser: false }));
 
 
 const routes = require('./routes')(app)

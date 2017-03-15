@@ -1,0 +1,25 @@
+{
+  "name": "say3",
+  "version": "1.0.0",
+  "description": "A Vue.js project",
+  "author": "dadadahui <921608262@qq.com>",
+  "private": true,
+  "scripts": {
+    "dev": "node ./app.js",
+    "build": "node ./app.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "leanengine": "^1.2.4"
+  },
+  "engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}

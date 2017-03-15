@@ -3,8 +3,6 @@ import Mint from 'mint-ui';
 import 'mint-ui/lib/style.css'
 import axios from 'axios'
 import VueRouter from 'vue-router';
-// import AV from 'leancloud-storage'
-// import lean from './lean';
 
 import App from './App';
 import register from 'components/views/register/register';
