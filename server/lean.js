@@ -6,5 +6,6 @@ AV.init({
   masterKey: process.env.LEANCLOUD_APP_MASTER_KEY || '1F3g50pfEgcTnXElpLsvGxxH'
 })
 
+AV.Cloud.useMasterKey()
 
 module.exports= AV;

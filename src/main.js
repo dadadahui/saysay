@@ -12,8 +12,9 @@ import main from 'components/views/main/main';
 import home from 'components/views/home/home';
 import explore from 'components/views/explore/explore';
 import me from 'components/views/me/me';
-import wordDetail from 'components/wordDetail/wordDetail';
+import wordDetail from 'components/views/wordDetail/wordDetail';
 import shoot from 'components/views/shoot/shoot';
+import search from 'components/views/search/search';
 
 //lean
 var APP_ID = 'nhKwEEEgzby6qiIn3Far8LoC-gzGzoHsz';
@@ -21,14 +22,15 @@ var APP_KEY = 'j9DjWm5Jf6crfxtu3Hvehi4p';
 
 AV.init({
   appId: APP_ID,
-  appKey: APP_KEY
+  appKey: APP_KEY,
 });
+
 // 浏览器的 Console 中设置 localStorage
 localStorage.setItem('debug', 'leancloud*');
 
 Vue.use(VueRouter);
 Vue.use(Mint);
-Vue.prototype.$http = axios
+Vue.prototype.$http = axios;
 const router = new VueRouter({
   routes :[
     {
@@ -52,29 +54,37 @@ const router = new VueRouter({
       component:main,
       children:[
         {
-          path:'home',
+          path:'/home',
+          name:'home',
           component:home
+
         },
         {
           path:'explore',
+          name:'explore',
           component:explore
         },
         {
           path:'me',
+          name:'me',
           component:me
         },
         {
-          path:'wordDetail',
+          path:'/word/:wordname',
+          name:'wordDetail',
           component:wordDetail
         },
         {
-          path:'shoot',
+          path:'/shoot/:wordname',
+          name:'shoot',
           component:shoot
         }
-
       ]
     },
-
+    {
+      path:'/search',
+      component:search
+    }
   ]
 });
 

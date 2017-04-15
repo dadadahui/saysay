@@ -11,12 +11,11 @@
   </div>
 
 </template>
-
 <script type="text/ecmascript-6">
     export default{
-      data(){
+      data: function () {
         return {
-          regActive:true
+          regActive: true
         }
       },
       methods:{

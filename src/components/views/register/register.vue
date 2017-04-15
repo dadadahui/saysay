@@ -3,12 +3,10 @@
       <imageheader></imageHeader>
       <div class="content">
         <input placeholder="username" v-model="username">
-        <!--<span>{{usernameTip}}</span>-->
         <input placeholder="password" v-model="password">
-        <!--<span>{{passwordTip}}</span>-->
         <input type="button" value="register" @click="register">
       </div>
-      <router-view></router-view>
+      <!--<router-view></router-view>-->
 
     </div>
 </template>
@@ -21,9 +19,7 @@
     data: function () {
       return {
         username: '',
-        password: '',
-        // usernameTip:'',
-        // passwordTip:''
+        password: ''
       }
     },
     methods: {
@@ -33,16 +29,15 @@
             username: this.username,
             password: this.password
           }).then((response) => {
-          console.log(response.data)
-
           if (response.data.errno == ERR_OK) {
               console.log('注册成功！')
-              this.$router.push('/main');
-            } else {
+            this.$router.push({name:'home'});
+          } else {
               console.log('注册失败！');
             }
         })
       }
+
     },
     components: {
       imageheader

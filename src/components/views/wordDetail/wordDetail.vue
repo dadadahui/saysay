@@ -1,21 +1,32 @@
 <template>
-  <div v-show="showFlag" class="wordDetail" >
+  <div class="wordDetail" >
     <div class="word">
-      <span class="word-name">{{word.wordname}}</span>
-      <span class="add-video" @click="takeVideo">add a video</span>
+      <span class="word-name">{{wordname}}</span>
+      <span class="add-video" @click="goTo(wordname)">add a video</span>
     </div>
     <div class="videoList" ref="listWrapper">
       <ul >
         <li v-for = "video in videos" class="item">
           <div class="user">
-            <img :src="video.user.avatar" class="avatar">
-            <span class="username">{{video.user.username}}</span>
+            <img :src="video.author.avatar" class="avatar">
+            <span class="username">{{video.author.username}}</span>
           </div>
           <div class="video">
-            <video :src="video.url" autoplay ></video>
+            <video :src="video.url" @play="playVideo($event)"
+                   id="my-player"
+                   class="video-js vjs-big-play-centered"
+                   controls
+                   preload="auto"
+
+                   data-setup='{}'>
+              <p class="vjs-no-js">
+                To view this video please enable JavaScript, and consider upgrading to a
+                web browser that
+              </p>
+            </video>
             <div class="thumb">
-              <div class="like">{{video.likeCount}}</div>
-              <div class="dislike">{{video.dislikeCount}}</div>
+              <div class="like" @click="like(video,$event)">{{video.likeCount}}</div>
+              <div class="dislike" @click="dislike(video,$event)">{{video.dislikeCount}}</div>
             </div>
             <div class="views">{{video.views}}</div>
           </div>
@@ -24,58 +35,73 @@
     </div>
 
   </div>
+
 </template>
 
 <script type="text/ecmascript-6">
   import BScroll from "better-scroll";
+  import $ from 'jquery';
 
     export default{
-      props:{
-        word:{
-          type:Object
-        }
-      },
+
       data(){
         return {
-          showFlag:false,
-          videos:[]
+         videos:[],
         }
       },
       methods:{
-        show(){
-          this.showFlag=true;
-          this.$nextTick(()=>{
-            if(!this.scroll){
-              this.scroll = new BScroll(this.$refs.listWrapper,{
-                click:true
-              })
-            }else{
-              this.scroll.refresh();
-            };
-          })
-        },
-        takeVideo(){
-          this.$router.replace('/main/shoot');
-        }
 
+        goTo(wordname){
+          this.$router.push({name:'shoot',params:{wordname:wordname}});
+        },
+        like(video,event){
+          if(!event._constructed){
+            return;
+          }
+          video.likeCount ++;
+        },
+        dislike(video,event){
+          if(!event._constructed){
+            return;
+          }
+          video.dislikeCount ++;
+        },
+        //一个播放，其他暂停
+        playVideo(event){
+          let currVideo = event.currentTarget;
+
+          let $others = $('video').not(currVideo)
+          for(let item of $others){
+            item.pause()
+          }
+
+
+        },
       },
       computed:{
         wordname:function () {
-          return this.word.wordname
+          return this.$route.params.wordname
         },
 
       },
 
-      mounted:function () {
-        // ${this.wordname}
-        this.$http.get(`http://localhost:9099/api/videos/bye`).then((response)=>{
+      created:function () {
+        this.$http.get(`http://localhost:9099/api/videos/${this.wordname}`).then((response)=>{
           this.videos = response.data;
-          console.log(this.videos);
-        });
 
+        });
+        this.$nextTick(()=>{
+          if(!this.scroll){
+            this.scroll = new BScroll(this.$refs.listWrapper,{
+              click:true
+            })
+          }else{
+            this.scroll.refresh();
+          };
+        })
       }
     }
-</script>
+ </script>
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .circle
@@ -128,6 +154,7 @@
           .username
             font-size: 15px
             color: #E91E63
+            vertical-align: -webkit-baseline-middle;
         .video
           width:100%
           height 0
@@ -138,6 +165,7 @@
             position absolute
             top 0
             left:0
+            width:100%
             height 100%
           .thumb
             position absolute

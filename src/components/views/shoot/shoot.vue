@@ -1,26 +1,30 @@
 <template>
-  <div class="shoot">
-    <video  autoplay ref="video"></video>
+  <div class="shoot" ref="videoWrap">
+    <video  autoplay ref="video" loop></video>
     <button class="start" v-show = "startFlag" @click.stop="startRecording">start</button>
     <button class="stop" v-show = "!startFlag" @click.stop="stopRecording">stop</button>
-    <button class="publish" @click="saveToCloud" ref="anchor">publish</button>
+    <button class="publish" @click="saveToCloud" ref="anchor" >publish</button>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-
+  import { Toast } from 'mint-ui';
   export default{
     data(){
       return {
         mediaStream: Object,
-        recoder: Object,
         startFlag: true,
         videoBlob: Object,
-        url: '',
-        word: 'bye'
+        url: ''
+      }
+    },
+    computed:{
+      wordname:function () {
+        return this.$route.params.wordname
       }
     },
     methods: {
+
       /*
        检测权限
        不同浏览器不一样，待研究...
@@ -46,7 +50,7 @@
       startRecording(){
         let vm = this;
         vm.getMediaStream();
-        this.recorder = new MediaRecorder(vm.mediaStream);
+        this.recorder = new MediaRecorder(vm.mediaStream,{mimeType: 'video/webm;codecs=vp9'});
         this.recorder.start();
         this.recorder.ondataavailable = function (evt) {
           //录像结束时调用
@@ -67,60 +71,89 @@
 
         }
       },
-      addWord(){
-        this.$http.post('http://localhost:9099/api/videos',
-          {
-            url: this.url,
-            user: {
-              username: "hhh",
-            },
-            wordname: 'bye',
-            likeCount: '0',
-            dislikeCount: '0',
-            views: '0'
-          }).catch(e => {
-          console.error(e);
-        }).then(function () {
-          console.log('add success!')
-        })
-      },
+
       saveToCloud(){
         let vm = this;
         let reader = new FileReader();
-        reader.readAsDataURL(this.videoBlob);
-        reader.onloadend = function () {
-          let base64data = {base64: reader.result};
-          // let file = new AV.File('video.mp4', base64data);
-          // file.save().then(function (file) {
-          //   vm.url = file.url();
-          //   vm.addWord();
-          // });
-        }
 
+          reader.readAsDataURL(this.videoBlob);
+
+          reader.onloadend = function () {
+            let base64data = {base64: reader.result};
+            let file = new AV.File('video.webm', base64data);
+            file.save().then(function (file) {
+              vm.url = file.url();
+              vm.$http.post('http://localhost:9099/api/videos',
+                {
+                  url: vm.url,
+                  wordname: vm.wordname,
+                  likeCount: '0',
+                  dislikeCount: '0'
+                }).then(function () {
+                console.log('add success!')
+              }).catch(e => {
+                console.error(e);
+              })
+            });
+            this.videoBlob = null;
+          }
+          let toast =  Toast({
+            message: '跳转中~~',
+            position: 'center',
+            duration: 3000
+          });
+
+          setTimeout(function () {
+            toast.close();
+            vm.$router.go(-1);
+          },3000);
 
       }
     },
     mounted: function () {
-      this.getMediaStream()
+      this.getMediaStream();
+      let videoWrap = this.$refs.videoWrap;
+      videoWrap.style.width = window.innerWidth + 'px';
+      videoWrap.style.height = window.innerHeight + 'px';
     }
   };
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
 .shoot
-  position fixed
-  top: 40px
+  position relative
+  top: 0
   left:0
-  bottom 55px
-  width 100%
   overflow hidden
   video
-    width 100%
-    height 200px
-  button{
-    width: 50px
-    height 50px
+    position: absolute;
+    left: 50%;
+    top: 36%;
+    z-index: 1;
+    -webkit-transform: translate(-50%,-50%);
+    -webkit-transform-origin: 50% 50%;
+  button {
+    position absolute
+    z-index:2
+    width: 60px
+    height 60px
     border-radius 50%
+    bottom: 112px;
+    border:none
+    background #b91667
+    color: #fff
+    &.start{
+      left: 20%
+    }
+    &.stop{
+      left: 20%
+    }
+    &.publish{
+      right: 20%
+    }
+    &[disabled]{
+      background #999
+    }
 
   }
 </style>

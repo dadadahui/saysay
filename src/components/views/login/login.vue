@@ -2,7 +2,7 @@
   <div class="login">
     <imageheader></imageHeader>
     <div class="content">
-      <input placeholder="email" v-model="email">
+      <input placeholder="username" v-model="username">
       <input placeholder="password" v-model="password">
       <input type="button" value="login" @click="login">
     </div>
@@ -30,11 +30,11 @@
             username:this.username,
             password:this.password
           }).then((response) => {
-           console.log(response.data)
-
            if (response.data.errno == ERR_OK) {
+             console.log(response.data)
              console.log('登录成功！')
-             this.$router.push('/main');
+
+             this.$router.push({name:'home'});
 
             } else {
              console.log('登录失败！');

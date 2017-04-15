@@ -7,16 +7,16 @@
     </mt-header>
 
     <mt-tabbar v-model="selected">
-      <mt-tab-item id="home" @click.native="goTo('/main/home')">
-        <i slot="icon" class="icon">&#xe600;</i>
+      <mt-tab-item id="home" @click.native="goTo('home')">
+        <i slot="icon" class="iconfont icon-home"></i>
         home
       </mt-tab-item>
-      <mt-tab-item id="explore" @click.native="goTo('/main/explore')">
-        <i slot="icon" class="icon">&#xe600;</i>
+      <mt-tab-item id="explore" @click.native="goTo('explore')">
+        <i slot="icon" class="iconfont icon-explore"></i>
         explore
       </mt-tab-item>
-      <mt-tab-item id="me" @click.native="goTo('/main/me')">
-        <i slot="icon" class="icon">&#xe600;</i>
+      <mt-tab-item id="me" @click.native="goTo('me')">
+        <i slot="icon" class="iconfont icon-me"></i>
         me
       </mt-tab-item>
     </mt-tabbar>
@@ -29,19 +29,21 @@
 </template>
 
 <script type="text/ecmascript-6">
-
 export default{
-
+  data: function () {
+    return {
+      selected: 'home'
+    }
+  },
   methods:{
-    goTo:function (path) {
-      this.$router.replace(path);
+    goTo:function (name) {
+      this.$router.replace({name:name});
     }
   }
 };
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
-  @import "../../../common/stylus/iconfont.styl"
 
   .main
     position fixed
@@ -52,30 +54,12 @@ export default{
     background #fff
     .mint-header
       background-color #e91e63
-    .mint-header-title,.mintui-search
+    .mint-header-title
       font-size 20px
-/*    .tabs
-      display flex
-      position: absolute
-      top: 40px
-      width:100%
-      height 80px
-      line-height: 80px;
-      background-color #e91e63
-      text-align center
-      .tab-item
-        flex:1
-        .icon
-          font-size 28px
-          font-style normal
-          font-family iconfont
-        li
-          display: block
-          font-size: 14px
-          color: rgba(255,255,255,0.5)
-          &.router-link-active
-            border-bottom 1px solid yellow
-            color: #fff*/
+    .mintui-search
+      font-size 20px
+    .iconfont
+      font-size 24px
     .mint-tabbar
       z-index:999
 

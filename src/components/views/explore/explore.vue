@@ -1,22 +1,30 @@
 <template>
 <div class="explore" ref="listWrapper">
-  <ul>
-    <li v-for="(word,index) in words" class="word" :class="classMap[index%classMap.length]" @click="selectWord(word,$event)">
-      <div class="wordname">{{word.wordname}}</div>
-      <div class="videosCount">
-        <!--<i>&#xe696;</i>-->
-        {{word.videosCount}}
-      </div>
-    </li>
-  </ul>
-  <wordDetail :word="selectedWord" ref="word"></wordDetail>
+
+  <mt-cell-swipe
+    v-for="(word,index) in words"
+    :title=word.wordname
+    :to=" {name: 'wordDetail', params: { wordname:  word.wordname}}"
+    :right="[
+          {
+            content: 'Delete',
+            style: { background: 'red', color: '#fff' },
+            handler(){deleteWord(word.objectId)}
+          }
+        ]"
+    :class="classMap[index%classMap.length]"
+    class="word">
+  </mt-cell-swipe>
+
+
+
+
 </div>
 </template>
 
 <script type="text/ecmascript-6">
   import BScroll from "better-scroll";
-  import wordDetail from 'components/wordDetail/wordDetail';
-
+  import { CellSwipe } from 'mint-ui';
   export default{
     data() {
       return {
@@ -25,21 +33,24 @@
       };
     },
     methods: {
-      goTo: function (path) {
-        this.$router.replace(path);
-      },
-      selectWord(word, event){
-        if (!event._constructed) {
-          return;
-        }
-        this.selectedWord = word;
-        this.$refs.word.show();
+      deleteWord(id){
+        console.log(id)
+        this.$http.delete(`http://localhost:9099/api/words/${id}`).then((response)=>{
+          this.$http.get('http://localhost:9099/api/words').then((response) => {
+            this.words = response.data;
+          })
+        });
       }
     },
     created(){
       this.classMap = ['bg1', 'bg2', 'bg3', 'bg4', 'bg5', 'bg6', 'bg7'];
 
-      this.$http.get('http://localhost:9099/api/words').then((response) => {
+
+
+
+    },
+    mounted(){
+        this.$http.get('http://localhost:9099/api/words').then((response) => {
         this.words = response.data;
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -52,12 +63,7 @@
           }
           ;
         })
-      });
-
-
-    },
-    components: {
-      wordDetail
+      })
     }
   };
 </script>
@@ -75,13 +81,13 @@
     overflow hidden
   .word
     box-sizing border-box
-    padding 0 16px 0 16px
+    /*padding 0 16px 0 16px*/
     color: #fff
     font-size 20px
     &:first-child
       margin-top: 10px;
     margin-bottom 10px
-    height 56px
+    /*height 56px*/
     background greenyellow
     &.bg1
       background #63D930
@@ -97,10 +103,6 @@
       background: #E62464
     &.bg7
       background: #149747
-    .wordname
-      line-height: 56px;
-      float: left
-    .videosCount
-      line-height: 56px;
-      float: right
+
+
 </style>

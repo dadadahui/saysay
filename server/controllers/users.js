@@ -24,11 +24,9 @@ router.post.signup = (req,res) => {
     .then(loginedUser => {
       // 保存当前用户到 Cookie
       //加上后，返回速度慢
-      // res.saveCurrentUser(loginedUser);
-
+      res.saveCurrentUser(loginedUser);
       res.json({
-        errno:0,
-        loginedUser:loginedUser
+        errno:0
       })
     },err=>{
       //202，用户已注册
@@ -44,26 +42,25 @@ router.post.login = (req,res) => {
   let username = req.body.username;
   let password = req.body.password;
 
-  AV.User.become(Math.random().toString())
+  // AV.User.become(Math.random().toString())
   AV.User.logIn(username,password)
     .then(loginedUser => {
-      // res.saveCurrentUser(loginedUser);
-      // res.json(AV.User.current())
-      // console.log(AV.User.current());
+      res.saveCurrentUser(loginedUser);      // req.currentUser,只有一个id
+
       res.json({
-        errno:0,
-        loginedUser:loginedUser,
-        curr:AV.User.current()
+        errno:0
       })
     },err=>{
-      // 211,用户名不存在
-      // 210,密码错误
       res.json({
         errno:1,
         err:err,
-        curr:AV.User.current()
       })
     })
+}
+
+router.get.getCurrUser = (req,res)=>{
+  res.json(req.currentUser)
+  // res.json(AV.User.current())
 }
 
 
