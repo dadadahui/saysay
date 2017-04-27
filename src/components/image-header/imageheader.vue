@@ -1,7 +1,7 @@
 <template>
  <div class="image-header">
    <router-link  to="/startup">
-     <i class="back"> &#xe602;</i>
+     <i class="icon-back back"></i>
    </router-link>
    <img src="./header.png">
    <div class="title">Say</div>
@@ -14,25 +14,23 @@
     };
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus">
-
-  @import "../../common/stylus/iconfont.styl"
+<style lang="stylus" rel="stylesheet/stylus" scoped>
 
 .image-header
   position relative
   width:100%
   height 300px
+
   .back
     position absolute
     top: 10px
     left: 10px
     font-family iconfont
     z-index:999
+
   .title
     position absolute
-    top: 14px
-    left:-36px
-    color:RGBA(233, 30, 99, 0.6)
+    color:rgba(126, 87, 194, 0.5);
     font-size 16em
   img
     position absolute
@@ -40,6 +38,7 @@
     top:0
     width:100%
     height 100%
+
 
 
 </style>

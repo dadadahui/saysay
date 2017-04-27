@@ -1,73 +1,102 @@
 <template>
   <div class="search">
+    <mu-appbar title="Say">
+      <mu-icon-button icon="backspace" @click="this.back" slot="left"/>
+    </mu-appbar>
+    <div class="content">
+      <mu-auto-complete hintText="type a word.."   fullWidth v-model="value" @input="getWords" :dataSource="result"   @select="goTo"/>
+      <mu-float-button v-show="showFlag" icon="add" class="demo-float-button" @click="addWord(value)"/>
+      <mu-dialog :open="dialogOk" title="tips:" >
+        add success!
+        <mu-flat-button label="ok" slot="actions" primary @click="closeDialogOk"/>
+      </mu-dialog>
+      <mu-dialog :open="dialogWrong" title="tips:" >
+        please type a word first ~
+        <mu-flat-button label="ok" slot="actions" primary @click="closeDialogWrong"/>
+      </mu-dialog>
+    </div>
 
-    <mt-search autofocus v-model.lazy="value" v-bind:blur="getWords()">
-      <mt-cell
-        v-for="(item,index) in result"
-        :title="item.wordname"
-        :to="{ name: 'wordDetail', params: { wordname:  item.wordname}}"
-       >
-        <span class="new" v-show="item.new" @click= "addWord(item.wordname)">+</span>
-      </mt-cell>
-    </mt-search>
 
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import {Search} from 'mint-ui';
-
   export default{
     data(){
       return {
+        result:[],
         value:'',
-        result:[]
+        dialogOk: false,
+        dialogWrong:false
       }
     },
-
+    computed:{
+      showFlag:function () {
+        return !!!this.result.length
+      }
+    },
     methods:{
-      getWords(){
+      back(){
+        this.$router.go(-1)
+      },
+      closeDialogOk () {
+        this.dialogOk = false
+      },
+      closeDialogWrong () {
+        this.dialogWrong = false
+      },
+      getWords(val){
         let vm = this;
-        let isExisted = false;//不存在
-        vm.$http.get(`http://localhost:9099/api/words/${this.value}`).then((response) => {
-          vm.result =  response.data;
-          vm.result.forEach(v=>{
-            if (v.wordname == vm.value){
-              isExisted = true;
-            }else{
-              isExisted = false;
-            }
-          })
-          if (!isExisted){
-            vm.result.unshift({
-              'wordname':vm.value,
-              'new':true
-            })
-          }
 
-        })
+        vm.$http.get(`http://localhost:9099/api/words/${val}`).then((response) => {
+          vm.result =  response.data;
+          if (vm.result.length){
+            vm.result = []
+            response.data.forEach(v=>{
+              vm.result.push(v.wordname);
+            })
+
+          console.log(vm.result)
+
+        }})
 
       },
       addWord(wordname){
-        this.$http.post(`http://localhost:9099/api/words`,{
-          'wordname':wordname
-        }).then((response) => {
-          console.log(response)
-        })
-      }
+        if(wordname.length !== 0){
+          this.$http.post(`http://localhost:9099/api/words`,{
+            'wordname':wordname
+          }).then((response) => {
+            console.log(response)
+            this.dialogOk = true
+          })
+        }else{
+          this.dialogWrong = true
+        }
+
+      },
+      goTo(wordname){
+          this.$router.push({name: 'wordDetail', params: {wordname: wordname}});
+      },
     }
   }
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus">
+<style lang="stylus" rel="stylesheet/stylus" scoped>
   .search
+    display: flex
     position fixed
     left:0
     top:0
     bottom:0
     width:100%
     background #fff
-    .new
+    .mu-icon
+      font-size 20px
+    .content
+      width:100%
+      display: flex
       position absolute
-      z-index 999
+      top: 80px
+      padding 10px
+      bottom:0
 </style>

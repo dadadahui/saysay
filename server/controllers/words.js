@@ -12,6 +12,7 @@ const Word = AV.Object.extend('Word');
 
 router.get.getAllWords = (req,res)=>{
   let query = new AV.Query('Word');
+  query.addDescending('createdAt');
   query.find().then((results)=>{
     //an array
     res.json(results);
@@ -23,6 +24,7 @@ router.get.getWord  = (req,res)=>{
   let wordname = req.params.wordname;
 
   query.startsWith('wordname', wordname);
+  query.select('wordname');
   query.find().then(results=>{
     res.json(results)
   })
@@ -53,7 +55,7 @@ router.delete.deleteWord = (req,res)=>{
   let queryVideo = new AV.Query('Video');
   queryVideo.equalTo('word',word);
   queryVideo.find().then(videos=>{
-    return     AV.Object.destroyAll(videos)
+    return  AV.Object.destroyAll(videos)
   }).then(res.json('delete videos!'))
 
   word.destroy().then(()=>{

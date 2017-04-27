@@ -17,9 +17,6 @@
         return {
           regActive: true
         }
-      },
-      methods:{
-
       }
     };
 </script>
@@ -39,19 +36,20 @@
   .buttons
     position fixed
     left:0
-    bottom 0
+    bottom 50%
     width:100%
     height 140px
     color: #fff
+    transform: translateY(70px);
     & > a
       display: block
       width: 100%
       height 50%
       background #fff
-      color: #E91E63
-      font-size 5em
+      color: #7E57C2
+      font-size 4em
       &.active
-        background #E91E63
+        background #7E57C2
         color: #fff
 
 

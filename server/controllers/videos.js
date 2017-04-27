@@ -2,7 +2,6 @@
  * Created by jhh on 2017/2/10.
  */
 const AV = require('../lean');
-const co = require('co');
 const router = {
   get: {},
   post: {},
@@ -12,7 +11,7 @@ const router = {
 const Video = AV.Object.extend('Video');
 const Word = AV.Object.extend("Word");
 
-//author、word
+
 
 router.get.getVideosNew = (req, res) => {
   let queryVideo = new AV.Query('Video');
@@ -20,57 +19,152 @@ router.get.getVideosNew = (req, res) => {
   let queryUser = new AV.Query('User');
 
   queryVideo.addDescending('createdAt');
-
+  queryVideo.include('author','word')
+  let videos = [];
   queryVideo.find().then((results) => {
-
-    let promises = [];
-
     results.forEach(function (result) {
-      var video = {};
-
-      promises.push(
-        queryWord.get(result.get('word').get('id'))
-          .then(word=>{
-            let wordname = word.get('wordname');
-            return wordname;
-          })
-          .then(wordname=>{
-             video = {
-              id:result.get('id'),
-              url:result.get('url'),
-              likeCount:result.get('likeCount'),
-              dislikeCount:result.get('dislikeCount'),
-              // author:authorObj,
-              word:{
-                wordname:wordname
-              }
-            }
-            return  queryUser.get(result.get('author').get('id'));
-          })
-          .then(author=>{
-            let authorObj  = {
-              id:author.get('id'),
-              username:author.get('username'),
-              avatar:author.get('avatar').get('url')
-            };
-            video.author = authorObj
-            return video;
-          })
-      )
+      videos.push({
+        id:result.get('id'),
+        url:result.get('url'),
+        likeCount:result.get('likeCount'),
+        dislikeCount:result.get('dislikeCount'),
+        word:{
+          wordname:result.get('word').get('wordname'),
+        },
+        author:{
+              id:result.get('author').get('id'),
+               username:result.get('author').get('username'),
+        }
+      })
      })
-    Promise.all(promises).then((videos)=>{
-      res.json(videos)
-    })
+    res.json(videos)
   });
 
 };
+router.get.getThumbCountCurrUser = (req,res)=>{
+  let queryVideo = new AV.Query('Video');
 
+  let author = AV.User.current();
+  queryVideo.equalTo('author',author);
 
-//特定单词，按like数倒序
+  queryVideo.find().then((results)=>{
+
+    let likeCount = 0;
+    let dislikeCount = 0;
+
+    results.forEach(v=>{
+      likeCount += v.get('likeCount');
+      dislikeCount += v.get('dislikeCount');
+    })
+
+    let count = {
+      likeCount:likeCount,
+      dislikeCount:dislikeCount
+    };
+
+    return count;
+  })
+    .catch(e=>{
+      res.json(e)
+    })
+    .then(count=>{
+      res.json(count)
+    })
+
+}
+router.get.getThumbCount = (req,res)=>{
+  let queryVideo = new AV.Query('Video');
+  let userId = req.params.userId;
+  let author = AV.Object.createWithoutData('User', userId);
+  // let author = AV.User.current();
+  queryVideo.equalTo('author',author);
+
+  queryVideo.find().then((results)=>{
+
+    let likeCount = 0;
+    let dislikeCount = 0;
+
+    results.forEach(v=>{
+      likeCount += v.get('likeCount');
+      dislikeCount += v.get('dislikeCount');
+    })
+
+    let count = {
+      likeCount:likeCount,
+      dislikeCount:dislikeCount
+    };
+
+    return count;
+  })
+    .catch(e=>{
+    res.json(e)
+  })
+    .then(count=>{
+    res.json(count)
+  })
+
+}
+
+router.get.getVideosCurrUser = (req,res)=>{
+  let queryVideo = new AV.Query('Video');
+  let queryWord = new AV.Query('Word');
+
+  let author =AV.User.current();
+
+  queryVideo.equalTo('author',author);
+  queryVideo.include('word')
+  let videos = [];
+  queryVideo.find().then((results) => {
+
+    results.forEach(function (result) {
+      videos.push({
+        id:result.get('id'),
+        url:result.get('url'),
+        likeCount:result.get('likeCount'),
+        dislikeCount:result.get('dislikeCount'),
+        word:{
+          wordname:result.get('word').get('wordname'),
+        }
+      })
+    })
+    res.json(videos)
+  });
+
+};
+router.get.getVideosByUser = (req,res)=>{
+  let queryVideo = new AV.Query('Video');
+  let queryWord = new AV.Query('Word');
+
+  let userId = req.params.userId;
+  let author = AV.Object.createWithoutData('User', userId);
+
+  queryVideo.equalTo('author',author);
+  queryVideo.include('word','author');
+  queryVideo.find().then(results=> {
+
+    let videos = [];
+    queryVideo.find().then((results) => {
+      results.forEach(function (result) {
+        videos.push({
+          id: result.get('id'),
+          url: result.get('url'),
+          likeCount: result.get('likeCount'),
+          dislikeCount: result.get('dislikeCount'),
+          word: {
+            wordname: result.get('word').get('wordname'),
+          }
+        })
+      })
+      res.json(videos)
+    });
+  })
+};
+
 router.get.getVideosByWord = (req, res) => {
   let queryVideo = new AV.Query('Video');
   let queryWord = new AV.Query('Word');
   let queryUser = new AV.Query('User');
+  let queryComment = new AV.Query('Comment');
 
   let wordname = req.params.wordname;
   // 根据wordname查id
@@ -85,7 +179,6 @@ router.get.getVideosByWord = (req, res) => {
 
     // 想在查询的同时获取关联对象的属性则一定要使用 `include` 接口用来指定返回的 `key`
     queryVideo.include('word');
-
     queryVideo.addDescending('likeCount');
     queryVideo.find().then((results) => {
 
@@ -119,9 +212,11 @@ router.get.getVideosByWord = (req, res) => {
                 username:author.get('username'),
                 avatar:author.get('avatar').get('url')
               };
+
               video.author = authorObj
               return video;
             })
+
         )
       })
       Promise.all(promises).then((videos)=>{
@@ -131,7 +226,7 @@ router.get.getVideosByWord = (req, res) => {
   })
 }
 
-router.post.addLikeCount = (req,res) =>{
+router.post.saveLikeCount = (req,res) =>{
   let videoId = req.body.videoId;
   let likeCount = req.body.likeCount;
 
@@ -142,7 +237,7 @@ router.post.addLikeCount = (req,res) =>{
   );
 }
 
-router.post.addDislikeCount = (req,res) =>{
+router.post.saveDislikeCount = (req,res) =>{
   let videoId = req.body.videoId;
   let dislikeCount = req.body.dislikeCount;
 
@@ -152,11 +247,12 @@ router.post.addDislikeCount = (req,res) =>{
     res.json('added!')
   );
 }
+
 router.post.addVideo = (req, res) => {
   let url = req.body.url;
   let wordname = req.body.wordname;
-  let likeCount = req.body.likeCount;
-  let dislikeCount = req.body.dislikeCount;
+  let likeCount = Number.parseInt(req.body.likeCount);
+  let dislikeCount = Number.parseInt(req.body.dislikeCount);
   // let authorId = req.currentUser;//just an id
   let authorId = AV.User.current();
   let video = new Video();
@@ -195,8 +291,9 @@ router.post.addVideo = (req, res) => {
 router.delete.deleteVideo = (req, res) => {
   let id = req.params.id;
   let video = AV.Object.createWithoutData('Video', id);
-  video.destroy().then(() => {
-    res.json('deleted!');
+  video.destroy().then((video) => {
+
+    res.json(video);
   }, err => {
     res.json(err);
   })

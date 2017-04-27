@@ -3,6 +3,9 @@ import Mint from 'mint-ui';
 import 'mint-ui/lib/style.css'
 import axios from 'axios'
 import VueRouter from 'vue-router';
+import MuseUI from 'muse-ui'
+import 'muse-ui/dist/muse-ui.css'
+
 
 import App from './App';
 import register from 'components/views/register/register';
@@ -15,6 +18,9 @@ import me from 'components/views/me/me';
 import wordDetail from 'components/views/wordDetail/wordDetail';
 import shoot from 'components/views/shoot/shoot';
 import search from 'components/views/search/search';
+import user from 'components/views/user/user';
+import follower from 'components/views/follower/follower';
+import followee from 'components/views/followee/followee';
 
 //lean
 var APP_ID = 'nhKwEEEgzby6qiIn3Far8LoC-gzGzoHsz';
@@ -29,7 +35,7 @@ AV.init({
 localStorage.setItem('debug', 'leancloud*');
 
 Vue.use(VueRouter);
-Vue.use(Mint);
+Vue.use(MuseUI)
 Vue.prototype.$http = axios;
 const router = new VueRouter({
   routes :[
@@ -54,7 +60,7 @@ const router = new VueRouter({
       component:main,
       children:[
         {
-          path:'/home',
+          path:'home',
           name:'home',
           component:home
 
@@ -78,11 +84,27 @@ const router = new VueRouter({
           path:'/shoot/:wordname',
           name:'shoot',
           component:shoot
+        },
+        {
+          path:'/user/:userId',
+          name:'user',
+          component:user
+        },
+        {
+          path:'/user/follower',
+          name:'follower',
+          component:follower
+        },
+        {
+          path:'/user/followee',
+          name:'followee',
+          component:followee
         }
       ]
     },
     {
       path:'/search',
+      name:'search',
       component:search
     }
   ]

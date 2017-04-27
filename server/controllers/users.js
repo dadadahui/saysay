@@ -23,13 +23,11 @@ router.post.signup = (req,res) => {
   user.signUp()
     .then(loginedUser => {
       // 保存当前用户到 Cookie
-      //加上后，返回速度慢
       res.saveCurrentUser(loginedUser);
       res.json({
         errno:0
       })
     },err=>{
-      //202，用户已注册
       res.json({
         errno:1,
         err:err
@@ -58,10 +56,47 @@ router.post.login = (req,res) => {
     })
 }
 
-router.get.getCurrUser = (req,res)=>{
-  res.json(req.currentUser)
-  // res.json(AV.User.current())
+router.post.logout= (req,res)=>{
+  AV.User.logOut().then(res.json('logout!'));
 }
 
+router.post.follow = (req,res)=>{
+  let userId = req.body.userId;
+  AV.User.current().follow(userId).then(res.json('follower  success!'))
+}
+router.post.unfollow = (req,res)=>{
+  let userId = req.body.userId;
+  AV.User.current().follow(userId).then(res.json('unfollow  success!'))
+}
+//查询自己的粉丝
+router.get.getFollowers = (req,res)=>{
+  let query = AV.User.current().followerQuery();
+  query.include('follower');
+  query.find().then(function(followers){
+     res.json(followers);
+  });
+}
+
+//查询自己的粉丝
+router.get.getFollowees = (req,res)=>{
+  let query = AV.User.current().followeeQuery();
+  query.include('followee');
+  query.find().then(function(followees){
+    res.json(followees);
+  });
+}
+router.get.getCurrUser = (req,res)=>{
+  let user =AV.User.current();
+  res.json(user)
+}
+
+router.get.getUser = (req,res)=>{
+  let userId = req.params.userId;
+
+  var query = new AV.Query('_User');
+ query.get(userId).then(user=>{
+   res.json(user)
+ })
+}
 
 module.exports = router;

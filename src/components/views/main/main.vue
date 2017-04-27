@@ -1,30 +1,28 @@
 <template>
   <div class="main">
-    <mt-header title="Say" slot="left">
-      <router-link to="/search" slot="right">
-        <mt-button icon="search"></mt-button>
-      </router-link>
-    </mt-header>
-
-    <mt-tabbar v-model="selected">
-      <mt-tab-item id="home" @click.native="goTo('home')">
-        <i slot="icon" class="iconfont icon-home"></i>
-        home
-      </mt-tab-item>
-      <mt-tab-item id="explore" @click.native="goTo('explore')">
-        <i slot="icon" class="iconfont icon-explore"></i>
-        explore
-      </mt-tab-item>
-      <mt-tab-item id="me" @click.native="goTo('me')">
-        <i slot="icon" class="iconfont icon-me"></i>
-        me
-      </mt-tab-item>
-    </mt-tabbar>
+    <!--<mt-header title="Say" slot="left">-->
+      <!--<router-link to="/search" slot="right">-->
+        <!--<mt-button icon="search"></mt-button>-->
+      <!--</router-link>-->
+    <!--</mt-header>-->
+    <mu-appbar title="Say">
+      <!--<mu-icon-button icon="menu" slot="left"/>-->
+      <!--<mu-flat-button label="expand_more" slot="right"/>-->
+      <!--<mu-flat-button href="333" label="expand_more" slot="right"/>-->
+      <mu-icon-button icon="search" to="/search" slot="right"/>
+    </mu-appbar>
 
 
-    <keep-alive>
+    <mu-paper>
+      <mu-bottom-nav :value="bottomNav" @change="handleChange">
+        <mu-bottom-nav-item  :to=" {name: 'home'}" value="Home" title="Home" icon="home"/>
+        <mu-bottom-nav-item  :to=" {name: 'explore'}" value="Explore" title="Explore" icon="explore"/>
+        <mu-bottom-nav-item  :to=" {name: 'me'}" value="Me" title="Me" icon="person"/>
+      </mu-bottom-nav>
+    </mu-paper>
+    <!--<keep-alive>-->
       <router-view></router-view>
-    </keep-alive>
+    <!--</keep-alive>-->
   </div>
 </template>
 
@@ -32,12 +30,15 @@
 export default{
   data: function () {
     return {
-      selected: 'home'
+      bottomNav: 'Home'
     }
   },
   methods:{
     goTo:function (name) {
-      this.$router.replace({name:name});
+      this.$router.replace({name:val});
+    },
+    handleChange (val) {
+      this.bottomNav = val
     }
   }
 };
@@ -58,10 +59,12 @@ export default{
       font-size 20px
     .mintui-search
       font-size 20px
-    .iconfont
-      font-size 24px
-    .mint-tabbar
-      z-index:999
+    .mu-paper
+      width: 100%
+      position fixed
+      bottom:0
+      z-index 999
+
 
 
 </style>

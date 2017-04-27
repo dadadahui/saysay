@@ -2,9 +2,10 @@
   <div class="login">
     <imageheader></imageHeader>
     <div class="content">
-      <input placeholder="username" v-model="username">
-      <input placeholder="password" v-model="password">
-      <input type="button" value="login" @click="login">
+      <mu-text-field  hintText="username" v-model="username"/><br/>
+      <mu-text-field  hintText="password" v-model="password"/><br/>
+      <mu-raised-button fullWidth @click="login" label="login" class="demo-raised-button" primary/>
+      <mu-toast ref="mToast" v-if="toast" :message=this.message @close="hideToast"/>
     </div>
     <router-view></router-view>
   </div>
@@ -14,30 +15,45 @@
   import imageheader from "components/image-header/imageheader";
 
   const ERR_OK = 0;
+  const ERR_Wrong = 1;
 
   export default{
     data :function () {
       return {
         username:'',
-        password:''
+        password:'',
+        toast: false,
+        message:''
       }
     },
 
     methods:{
+      showToast () {
+        this.toast = true
+        if (this.toastTimer) clearTimeout(this.toastTimer)
+        this.toastTimer = setTimeout(() => { this.toast = false }, 2000)
+      },
+      hideToast () {
+        this.toast = false
+        if (this.toastTimer) clearTimeout(this.toastTimer)
+      },
        login() {
          this.$http.post('http://localhost:9099/api/users/login',
            {
             username:this.username,
             password:this.password
           }).then((response) => {
-           if (response.data.errno == ERR_OK) {
-             console.log(response.data)
-             console.log('登录成功！')
-
+           let data = response.data;
+           if (data.errno == ERR_OK) {
+             this.message = '登陆成功'
+             this.showToast()
              this.$router.push({name:'home'});
-
-            } else {
-             console.log('登录失败！');
+           } else if(data.errno == ERR_Wrong && data.err.code == 201){
+              this.message = '密码错误'
+             this.showToast()
+           }else if(data.errno == ERR_Wrong && data.err.code == 211){
+             this.message = '用户未注册'
+             this.showToast()
             }
           });
       }
@@ -63,23 +79,10 @@
       left:0
       width:100%
     .content
-      width: 200px
-      margin:0 auto
-      text-align center
-      input
-        margin-top 45px
-        width: 100%
-        border-bottom 1px solid #a7a7a7
-        font-weight:200
-        outline none
-        &:focus
-          border-bottom 1px solid #E91E63
-        &[type=button]
-          width: 80%
-          height: 35px
-          line-height: 35px
-          background #E91E63
-          color #fff
-          box-shadow 1px 1px 1px #a7a7a7
-          border-radius 2px
+       margin-top 40px
+       text-align center
+       color: #999
+       button
+        margin-top:20px
+        width 70%
 </style>

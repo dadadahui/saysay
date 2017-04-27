@@ -2,11 +2,11 @@
     <div class="register">
       <imageheader></imageHeader>
       <div class="content">
-        <input placeholder="username" v-model="username">
-        <input placeholder="password" v-model="password">
-        <input type="button" value="register" @click="register">
+        <mu-text-field  hintText="username" v-model="username"/><br/>
+        <mu-text-field  hintText="password" v-model="password"/><br/>
+        <mu-raised-button fullWidth @click="register" label="register" class="demo-raised-button" primary/>
+        <mu-toast ref="mToast" v-if="toast" :message=this.message @close="hideToast"/>
       </div>
-      <!--<router-view></router-view>-->
 
     </div>
 </template>
@@ -15,26 +15,40 @@
   import imageheader from "components/image-header/imageheader";
 
   const ERR_OK = 0;
+  const ERR_Wrong = 1;
+
   export default{
     data: function () {
       return {
         username: '',
-        password: ''
+        password: '',
+        toast: false,
+        message:''
       }
     },
     methods: {
+      showToast () {
+        this.toast = true
+        if (this.toastTimer) clearTimeout(this.toastTimer)
+        this.toastTimer = setTimeout(() => { this.toast = false }, 2000)
+      },
+      hideToast () {
+        this.toast = false
+        if (this.toastTimer) clearTimeout(this.toastTimer)
+      },
       register(){
         this.$http.post('http://localhost:9099/api/users/signup',
           {
             username: this.username,
             password: this.password
           }).then((response) => {
-          if (response.data.errno == ERR_OK) {
-              console.log('注册成功！')
+          let data = response.data;
+          if (data.errno == ERR_OK) {
             this.$router.push({name:'home'});
-          } else {
-              console.log('注册失败！');
-            }
+          }  else if(data.errno == ERR_Wrong && data.err.code == 202){
+            this.message = '用户已注册，请登录'
+            this.showToast()
+          }
         })
       }
 
@@ -54,26 +68,11 @@
   width:100%
   background #fff
   .content
-    width: 200px
-    margin:0 auto
-    text-align center
-    input
-      margin-top 45px
-      width: 100%
-      padding-bottom: 2px
-      border-bottom 1px solid #a7a7a7
-      font-weight:200
-      outline none
-      &:focus
-        border-bottom 1px solid #E91E63
-      &[type=button]
-        width: 80%
-        height: 35px
-        line-height: 35px
-        background #E91E63
-        color #fff
-        box-shadow 1px 1px 1px #a7a7a7
-        border-radius 2px
-
+      margin-top 40px
+      text-align center
+      color: #999
+      button
+        margin-top:20px
+        width 70%
 
 </style>
