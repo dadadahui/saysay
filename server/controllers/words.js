@@ -23,7 +23,7 @@ router.get.getWord  = (req,res)=>{
   let query = new AV.Query('Word');
   let wordname = req.params.wordname;
 
-  query.startsWith('wordname', wordname);
+  query.contains('wordname', wordname);
   query.select('wordname');
   query.find().then(results=>{
     res.json(results)

@@ -19,7 +19,7 @@
       mounted(){
         //当前用户
 
-        this.$http.get('http://localhost:9099/api/users/followee').then((response) => {
+        this.$http.get('/users/followee').then((response) => {
           this.followees = response.data;
           console.log(this.followees)
         })

@@ -1,12 +1,13 @@
 <template>
   <div class="explore" ref="listWrapper">
-
-    <mu-list>
-      <mu-list-item :title="word.wordname" v-for="(word,index) in words"
-                    :to=" {name: 'wordDetail', params: { wordname:  word.wordname}}"
-      >
-      </mu-list-item>
-    </mu-list>
+    <div class="list">
+      <mu-list>
+        <mu-list-item :title="word.wordname" v-for="word in words"
+                      :to=" {name: 'wordDetail', params: { wordname:  word.wordname}}"
+        >
+        </mu-list-item>
+      </mu-list>
+    </div>
 
   </div>
 </template>
@@ -23,8 +24,8 @@
     methods: {
       deleteWord(id){
         console.log(id)
-        this.$http.delete(`http://localhost:9099/api/words/${id}`).then((response) => {
-          this.$http.get('http://localhost:9099/api/words').then((response) => {
+        this.$http.delete(`/words/${id}`).then((response) => {
+          this.$http.get('/api/words').then((response) => {
             this.words = response.data;
           })
         });
@@ -34,7 +35,7 @@
       this.classMap = ['bg1', 'bg2', 'bg3', 'bg4', 'bg5', 'bg6', 'bg7'];
     },
     mounted(){
-      this.$http.get('http://localhost:9099/api/words').then((response) => {
+      this.$http.get('/words').then((response) => {
         this.words = response.data;
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -44,8 +45,7 @@
             })
           } else {
             this.scroll.refresh();
-          }
-          ;
+          };
         })
       })
     }
@@ -61,7 +61,7 @@
     position fixed
     top: 56px
     left: 0
-    bottom 40px
+    bottom 56px
     width 100%
     overflow hidden
 

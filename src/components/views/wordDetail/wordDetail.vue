@@ -7,12 +7,13 @@
     </div>
     <div class="videoList" ref="listWrapper">
       <ul>
-        <li v-for="video in videos" class="item">
+        <li v-for="(video,index) in videos" class="item">
 
           <mu-card-header :title="video.author.username" subTitle="nice to meet you !">
             <mu-avatar src="https://image.flaticon.com/icons/svg/145/145852.svg" slot="avatar"/>
           </mu-card-header>
-          <mvideo :video="video"></mvideo>
+          <mvideo :video="video" @show-comment = "showComment(index)"></mvideo>
+          <comment :videoId="video.id"  ref="comment"></comment>
         </li>
       </ul>
     </div>
@@ -24,6 +25,7 @@
 <script type="text/ecmascript-6">
   import BScroll from "better-scroll";
   import mvideo from "components/video/video";
+  import comment from "components/comment/comment";
 
   export default{
 
@@ -42,24 +44,28 @@ methods:{
     goTo(wordname){
       this.$router.push({name: 'shoot', params: {wordname: wordname}});
     },
+    showComment(index){
+      this.$refs.comment[index].show();
+    }
   },
     created: function () {
-
-      this.$http.get(`http://localhost:9099/api/videos/${this.wordname}`).then((response) => {
+      this.$http.get(`/videos/${this.wordname}`).then((response) => {
         this.videos = response.data;
+        this.$nextTick(() => {
+          if (!this.scroll) {
+            this.scroll = new BScroll(this.$refs.listWrapper, {
+              click: true
+            })
+          } else {
+            this.scroll.refresh();
+          };
+        })
       });
-      this.$nextTick(() => {
-        if (!this.scroll) {
-          this.scroll = new BScroll(this.$refs.listWrapper, {
-            click: true
-          })
-        } else {
-          this.scroll.refresh();
-        };
-      })
+
     },
     components:{
-      mvideo
+      mvideo,
+      comment
     }
   }
 </script>

@@ -19,11 +19,12 @@
     </div>
     <div class="videoswrapper" ref="videosWrapper">
       <ul class="videos">
-        <li v-for="video of videos">
+        <li v-for="(video,index) of videos">
           <div class="wordname" >
             <span @click="goTo(video.word.wordname)">{{video.word.wordname}}</span>
           </div>
-          <mvideo :video="video"></mvideo>
+          <mvideo :video="video" @show-comment = "showComment(index)"></mvideo>
+          <comment :videoId="video.id"  ref="comment"></comment>
         </li>
       </ul>
     </div>
@@ -34,16 +35,16 @@
 <script type="text/ecmascript-6">
   import mvideo from "components/video/video";
   import BScroll from "better-scroll";
+  import comment from "components/comment/comment";
+
 
   export default{
     data(){
       return {
         user:{},
         likeCount: '',
-        dislikeCount: '',
         videos: [],
         followFlagShow:true,
-
       }
     },
     computed: {
@@ -53,15 +54,14 @@
     },
     methods: {
       follow:function(){
-        this.$http.post(`http://localhost:9099/api/users/follow`,{
+        this.$http.post(`/users/follow`,{
           userId:this.userId
         }).then((response)=>{
-          console.log(response.data);
           this.followFlagShow = false;
         });
       },
       unfollow:function(){
-        this.$http.post(`http://localhost:9099/api/users/unfollow`,{
+        this.$http.post(`/users/unfollow`,{
           userId:this.userId
         }).then((response)=>{
           console.log(response.data);
@@ -72,38 +72,40 @@
       goTo: function (wordname) {
         this.$router.push({name: 'wordDetail', params: {wordname: wordname}});
       },
-
+      showComment(index){
+        this.$refs.comment[index].show();
+      }
     },
     mounted(){
 
       //更新DOM
-      this.$nextTick(() => {
-        if (!this.scroll) {
-          this.scroll = new BScroll(this.$refs.videosWrapper, {
-            click: true
-          })
-        } else {
-          this.scroll.refresh();
-        };
-      }),
+      this.$http.get(`/videos/${this.userId}`).then((response) => {
+        this.videos = response.data;
+        this.$nextTick(() => {
+          if (!this.scroll) {
+            this.scroll = new BScroll(this.$refs.videosWrapper, {
+              click: true
+            })
+          } else {
+            this.scroll.refresh();
+          };
+        })
+    }),
 
-        this.$http.get(`http://localhost:9099/api/videos/thumbcount/${this.userId}`).then((response) => {
+        this.$http.get(`/videos/likeCount/${this.userId}`).then((response) => {
           this.likeCount = response.data.likeCount;
-          this.dislikeCount = response.data.dislikeCount;
         }),
 
-        this.$http.get(`http://localhost:9099/api/videos/${this.userId}`).then((response) => {
-          this.videos = response.data;
-          console.log(this.videos)
-        })
 
-      this.$http.get(`http://localhost:9099/api/users/${this.userId}`).then((response) => {
+
+      this.$http.get(`/users/${this.userId}`).then((response) => {
         this.user = response.data
       })
 
     },
     components: {
-      mvideo
+      mvideo,
+      comment
     }
 
   };

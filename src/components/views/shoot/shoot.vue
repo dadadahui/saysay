@@ -30,17 +30,16 @@
        不同浏览器不一样，待研究...
        */
       hasGetUserMedia() {
-        // Note: Opera builds are unprefixed.
         return !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
         navigator.mozGetUserMedia || navigator.msGetUserMedia);
       },
       getMediaStream(){
         let vm = this;
-        if (this.hasGetUserMedia()) {
+        if (vm.hasGetUserMedia()) {
           navigator.getUserMedia({audio: true, video: true}, function (stream) {
             vm.mediaStream = stream;
             vm.$refs.video.srcObject = stream;
-          }, function () {
+          }, function (e) {
             console.log('Reeeejected!', e);
           });
         } else {
@@ -50,7 +49,7 @@
       startRecording(){
         let vm = this;
         vm.getMediaStream();
-        this.recorder = new MediaRecorder(vm.mediaStream, {mimeType: 'video/webm;codecs=vp9'});
+        this.recorder = new MediaRecorder(vm.mediaStream);
         this.recorder.start();
         this.recorder.ondataavailable = function (evt) {
           //录像结束时调用
@@ -79,10 +78,10 @@
 
         reader.onloadend = function () {
           let base64data = {base64: reader.result};
-          let file = new AV.File('video.webm', base64data);
+          let file = new AV.File('video.mp4', base64data);
           file.save().then(function (file) {
             vm.url = file.url();
-            vm.$http.post('http://localhost:9099/api/videos',
+            vm.$http.post('/videos',
               {
                 url: vm.url,
                 wordname: vm.wordname,

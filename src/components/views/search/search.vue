@@ -48,7 +48,7 @@
       getWords(val){
         let vm = this;
 
-        vm.$http.get(`http://localhost:9099/api/words/${val}`).then((response) => {
+        vm.$http.get(`/words/${val}`).then((response) => {
           vm.result =  response.data;
           if (vm.result.length){
             vm.result = []
@@ -63,7 +63,7 @@
       },
       addWord(wordname){
         if(wordname.length !== 0){
-          this.$http.post(`http://localhost:9099/api/words`,{
+          this.$http.post(`/words`,{
             'wordname':wordname
           }).then((response) => {
             console.log(response)

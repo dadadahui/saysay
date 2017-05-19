@@ -38,7 +38,7 @@
         if (this.toastTimer) clearTimeout(this.toastTimer)
       },
        login() {
-         this.$http.post('http://localhost:9099/api/users/login',
+         this.$http.post('/users/login',
            {
             username:this.username,
             password:this.password

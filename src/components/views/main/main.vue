@@ -1,14 +1,8 @@
 <template>
   <div class="main">
-    <!--<mt-header title="Say" slot="left">-->
-      <!--<router-link to="/search" slot="right">-->
-        <!--<mt-button icon="search"></mt-button>-->
-      <!--</router-link>-->
-    <!--</mt-header>-->
+
     <mu-appbar title="Say">
-      <!--<mu-icon-button icon="menu" slot="left"/>-->
-      <!--<mu-flat-button label="expand_more" slot="right"/>-->
-      <!--<mu-flat-button href="333" label="expand_more" slot="right"/>-->
+
       <mu-icon-button icon="search" to="/search" slot="right"/>
     </mu-appbar>
 
@@ -20,9 +14,7 @@
         <mu-bottom-nav-item  :to=" {name: 'me'}" value="Me" title="Me" icon="person"/>
       </mu-bottom-nav>
     </mu-paper>
-    <!--<keep-alive>-->
       <router-view></router-view>
-    <!--</keep-alive>-->
   </div>
 </template>
 

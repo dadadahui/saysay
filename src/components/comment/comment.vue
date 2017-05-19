@@ -21,7 +21,6 @@
 </template>
 
 <script type="text/ecmascript-6">
-  // import IScroll from "iscroll";
   import BScroll from "better-scroll";
 
   export default{
@@ -41,15 +40,25 @@
       addComment:function (event) {
         let vm = this;
         let newObj = {};
-        this.$http.post(`http://localhost:9099/api/comments`,{
+        this.$http.post(`/comments`,{
           videoId:this.videoId,
           content:this.content
         }).then((response) => {
-          return this.getCommentsByVideo()
-        }).then(response=>{
-          let data = response.data;
-          vm.comments.unshift(data[0]);
+
+          if (response.status == 200){
+
+            vm.getCommentsByVideo().then(results=>{
+              let data = results.data;
+
+              vm.comments.unshift(data[0]);
+            })
+          }else
+            if (response.data.errno == 332){
+            this.$router.replace('/')
+          }
+
         })
+
       },
       show:function () {
         this.showFlag = true;
@@ -58,7 +67,7 @@
         this.showFlag = false;
       },
       getCommentsByVideo:function () {
-       return this.$http.get(`http://localhost:9099/api/comments/${this.videoId}`)
+       return this.$http.get(`/comments/${this.videoId}`)
       }
     },
     mounted(){

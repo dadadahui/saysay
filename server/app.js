@@ -22,16 +22,8 @@ app.use(AV.express());
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(AV.Cloud.CookieSession({ secret: 'saysecret', maxAge: 3600000, fetchUser: false }));
-app.use('/',routes)
+app.use('/api',routes)
 
-// function checkLogin (req, res, next) {
-//   if (req.session.user) {
-//     next();//检验到用户已登入，转移权限阁下一个路由
-//   } else {
-//     res.redirect('/');//否则，页面重定位，不执行下面路由
-//   }
-// }
-// app.use(checkLogin())
 
 module.exports = app.listen('9099', function (err) {
   if (err) {

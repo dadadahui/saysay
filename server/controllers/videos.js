@@ -15,14 +15,14 @@ const Word = AV.Object.extend("Word");
 
 router.get.getVideosNew = (req, res) => {
   let queryVideo = new AV.Query('Video');
-  let queryWord = new AV.Query('Word');
-  let queryUser = new AV.Query('User');
 
   queryVideo.addDescending('createdAt');
-  queryVideo.include('author','word')
+  queryVideo.include(['author','word'])
   let videos = [];
   queryVideo.find().then((results) => {
+
     results.forEach(function (result) {
+
       videos.push({
         id:result.get('id'),
         url:result.get('url'),
@@ -33,7 +33,7 @@ router.get.getVideosNew = (req, res) => {
         },
         author:{
               id:result.get('author').get('id'),
-               username:result.get('author').get('username'),
+              username:result.get('author').get('username'),
         }
       })
      })
@@ -41,57 +41,23 @@ router.get.getVideosNew = (req, res) => {
   });
 
 };
-router.get.getThumbCountCurrUser = (req,res)=>{
-  let queryVideo = new AV.Query('Video');
 
-  let author = AV.User.current();
-  queryVideo.equalTo('author',author);
-
-  queryVideo.find().then((results)=>{
-
-    let likeCount = 0;
-    let dislikeCount = 0;
-
-    results.forEach(v=>{
-      likeCount += v.get('likeCount');
-      dislikeCount += v.get('dislikeCount');
-    })
-
-    let count = {
-      likeCount:likeCount,
-      dislikeCount:dislikeCount
-    };
-
-    return count;
-  })
-    .catch(e=>{
-      res.json(e)
-    })
-    .then(count=>{
-      res.json(count)
-    })
-
-}
-router.get.getThumbCount = (req,res)=>{
+router.get.getLikeCount = (req,res)=>{
   let queryVideo = new AV.Query('Video');
   let userId = req.params.userId;
   let author = AV.Object.createWithoutData('User', userId);
-  // let author = AV.User.current();
   queryVideo.equalTo('author',author);
 
   queryVideo.find().then((results)=>{
 
     let likeCount = 0;
-    let dislikeCount = 0;
 
     results.forEach(v=>{
       likeCount += v.get('likeCount');
-      dislikeCount += v.get('dislikeCount');
     })
 
     let count = {
       likeCount:likeCount,
-      dislikeCount:dislikeCount
     };
 
     return count;
@@ -105,14 +71,39 @@ router.get.getThumbCount = (req,res)=>{
 
 }
 
-router.get.getVideosCurrUser = (req,res)=>{
-  let queryVideo = new AV.Query('Video');
-  let queryWord = new AV.Query('Word');
+router.get.getLikeCountCurrUser = (req,res)=>{
 
+  let queryVideo = new AV.Query('Video');
   let author =AV.User.current();
 
   queryVideo.equalTo('author',author);
-  queryVideo.include('word')
+  queryVideo.find().then((results)=>{
+    let likeCount = 0;
+    results.forEach(v=>{
+      likeCount += v.get('likeCount');
+    })
+
+    let count = {
+      likeCount:likeCount
+    };
+
+    return count;
+  })
+    .then(count=>{
+      res.json(count)
+    })
+    .catch(e=>{
+      res.json(e)
+    })
+
+}
+
+router.get.getVideosCurrUser = (req,res)=>{
+  let queryVideo = new AV.Query('Video');
+
+  let author =AV.User.current();
+  queryVideo.equalTo('author',author);
+  queryVideo.include(['word'])
   let videos = [];
   queryVideo.find().then((results) => {
 
@@ -121,7 +112,6 @@ router.get.getVideosCurrUser = (req,res)=>{
         id:result.get('id'),
         url:result.get('url'),
         likeCount:result.get('likeCount'),
-        dislikeCount:result.get('dislikeCount'),
         word:{
           wordname:result.get('word').get('wordname'),
         }
@@ -131,9 +121,9 @@ router.get.getVideosCurrUser = (req,res)=>{
   });
 
 };
+
 router.get.getVideosByUser = (req,res)=>{
   let queryVideo = new AV.Query('Video');
-  let queryWord = new AV.Query('Word');
 
   let userId = req.params.userId;
   let author = AV.Object.createWithoutData('User', userId);
@@ -149,7 +139,6 @@ router.get.getVideosByUser = (req,res)=>{
           id: result.get('id'),
           url: result.get('url'),
           likeCount: result.get('likeCount'),
-          dislikeCount: result.get('dislikeCount'),
           word: {
             wordname: result.get('word').get('wordname'),
           }
@@ -163,67 +152,39 @@ router.get.getVideosByUser = (req,res)=>{
 router.get.getVideosByWord = (req, res) => {
   let queryVideo = new AV.Query('Video');
   let queryWord = new AV.Query('Word');
-  let queryUser = new AV.Query('User');
-  let queryComment = new AV.Query('Comment');
 
   let wordname = req.params.wordname;
-  // 根据wordname查id
   queryWord.equalTo('wordname', wordname);
   queryWord.select('objectId');
-  queryWord.first().then((result) => {
+  queryWord.first().then((rsl) => {
 
-    let wordId = result.id;
+    let wordId = rsl.id;
     let word = AV.Object.createWithoutData('Word', wordId);
 
     queryVideo.equalTo('word', word);
 
-    // 想在查询的同时获取关联对象的属性则一定要使用 `include` 接口用来指定返回的 `key`
-    queryVideo.include('word');
+    queryVideo.include('author');
     queryVideo.addDescending('likeCount');
     queryVideo.find().then((results) => {
+      let videos = [];
+      results.forEach(function(result){
 
-      let promises = [];
+        videos.push({
+          id: result.get('id'),
+          url: result.get('url'),
+          likeCount: result.get('likeCount'),
+          author:{
+            id:result.get('author').get('id'),
+            username:result.get('author').get('username'),
+          }
+        })
 
-      results.forEach(function (result) {
-        var video = {};
-
-        promises.push(
-          queryWord.get(result.get('word').get('id'))
-            .then(word=>{
-              let wordname = word.get('wordname');
-              return wordname;
-            })
-            .then(wordname=>{
-              video = {
-                id:result.get('id'),
-                url:result.get('url'),
-                likeCount:result.get('likeCount'),
-                dislikeCount:result.get('dislikeCount'),
-                // author:authorObj,
-                word:{
-                  wordname:wordname
-                }
-              }
-              return  queryUser.get(result.get('author').get('id'));
-            })
-            .then(author=>{
-              let authorObj  = {
-                id:author.get('id'),
-                username:author.get('username'),
-                avatar:author.get('avatar').get('url')
-              };
-
-              video.author = authorObj
-              return video;
-            })
-
-        )
       })
-      Promise.all(promises).then((videos)=>{
-        res.json(videos)
-      })
+      res.json(videos)
+    });
+
     })
-  })
+
 }
 
 router.post.saveLikeCount = (req,res) =>{
@@ -237,22 +198,12 @@ router.post.saveLikeCount = (req,res) =>{
   );
 }
 
-router.post.saveDislikeCount = (req,res) =>{
-  let videoId = req.body.videoId;
-  let dislikeCount = req.body.dislikeCount;
 
-  let video = AV.Object.createWithoutData('Video', videoId);
-  video.set('dislikeCount',dislikeCount);
-  video.save().then(
-    res.json('added!')
-  );
-}
 
 router.post.addVideo = (req, res) => {
   let url = req.body.url;
   let wordname = req.body.wordname;
-  let likeCount = Number.parseInt(req.body.likeCount);
-  let dislikeCount = Number.parseInt(req.body.dislikeCount);
+  let likeCount = Number.parseInt(req.body.likeCount)
   // let authorId = req.currentUser;//just an id
   let authorId = AV.User.current();
   let video = new Video();
@@ -267,14 +218,7 @@ router.post.addVideo = (req, res) => {
       video.set('url', url);
       video.set('word', word);
       video.set('likeCount', likeCount);
-      video.set('dislikeCount', dislikeCount);
       video.set('author', authorId);
-
-      let acl = new AV.ACL();
-      acl.setPublicReadAccess(true);
-      acl.setWriteAccess(AV.User.current(), true);
-
-      video.setACL(acl);
 
       video.save().then(()=>{
         res.json('added!');
@@ -284,6 +228,8 @@ router.post.addVideo = (req, res) => {
 
 
     })
+  }else{
+    res.json('login first')
   }
 
 }

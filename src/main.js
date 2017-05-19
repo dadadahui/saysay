@@ -36,6 +36,8 @@ localStorage.setItem('debug', 'leancloud*');
 
 Vue.use(VueRouter);
 Vue.use(MuseUI)
+axios.defaults.baseURL = 'http://localhost:9099/api';
+// axios.defaults.baseURL = 'http://172.16.100.63:9099/api';
 Vue.prototype.$http = axios;
 const router = new VueRouter({
   routes :[

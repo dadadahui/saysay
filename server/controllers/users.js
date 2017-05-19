@@ -70,20 +70,25 @@ router.post.unfollow = (req,res)=>{
 }
 //查询自己的粉丝
 router.get.getFollowers = (req,res)=>{
-  let query = AV.User.current().followerQuery();
-  query.include('follower');
-  query.find().then(function(followers){
-     res.json(followers);
-  });
+  if (AV.User.current()){
+    let query = AV.User.current().followerQuery();
+    query.include('follower');
+    query.find().then(function(followers){
+      res.json(followers);
+    });
+  }
 }
 
 //查询自己的粉丝
 router.get.getFollowees = (req,res)=>{
-  let query = AV.User.current().followeeQuery();
-  query.include('followee');
-  query.find().then(function(followees){
-    res.json(followees);
-  });
+  if (AV.User.current()){
+    let query = AV.User.current().followeeQuery();
+    query.include('followee');
+    query.find().then(function(followees){
+      res.json(followees);
+    });
+  }
+
 }
 router.get.getCurrUser = (req,res)=>{
   let user =AV.User.current();

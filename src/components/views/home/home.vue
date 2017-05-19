@@ -1,27 +1,15 @@
 <template>
-  <div class="home">
-    <mt-tab-container v-model="selected">
-      <mt-tab-container-item id="hot">
-        <div class="content" ref="contentWrapper">
+  <div class="home" ref="contentWrapper">
           <ul id="container">
             <li v-for = "(video,index) in newVideos" class="item">
               <mu-card-header :title="video.author.username" subTitle="nice to meet you !">
-                <!--<span class="user" >-->
                   <mu-avatar src="https://image.flaticon.com/icons/svg/145/145852.svg" slot="avatar" @click="goTo1(video.author.id)"/>
-                <!--</span>-->
-                <!--<span  class="follower" @click.stop.self.prevent="follower(video.author.id)" v-show="!notCurrUser(video.author.id) && followShow">关注</span>-->
-                <!--<span class="unfollow" @click.stop.self.prevent="unfollow(video.author.id)" v-show="!notCurrUser(video.author.id) && unfollowShow">取消关注</span>-->
                 <span class="word-name" @click="goTo(video.word.wordname)">{{video.word.wordname}}</span>
               </mu-card-header>
               <mvideo :video="video" @show-comment = "showComment(index)"></mvideo>
               <comment :videoId="video.id"  ref="comment"></comment>
             </li>
           </ul>
-        </div>
-      </mt-tab-container-item>
-    </mt-tab-container>
-
-
   </div>
 </template>
 
@@ -44,37 +32,11 @@
       },
 
       methods:{
-        follow:function(id){
-          this.$http.post(`http://localhost:9099/api/users/follow`,{
-            userId:id
-          }).then((response)=>{
-            console.log(response.data);
-            this.followShow = false;
-            this.unfollowShow = true;
-          });
-        },
-        unfollow:function(id){
-          this.$http.post(`http://localhost:9099/api/users/unfollow`,{
-            userId:id
-          }).then((response)=>{
-            console.log(response.data);
-            this.followShow = true;
-            this.unfollowShow = false;
-          });
-        },
-        notCurrUser:function(id){
-          return  id == this.currUserId;
-        },
         goTo:function (wordname) {
           this.$router.push({ name: 'wordDetail', params: { wordname: wordname }});
         },
         goTo1:function (userId) {
           this.$router.push({ name: 'user', params: { userId: userId }});
-        },
-        deleteVideo(id){
-            this.$http.delete(`http://localhost:9099/api/videos/${id}`).then((response)=>{
-              window.location.reload()
-          });
         },
         showComment(index){
           this.$refs.comment[index].show();
@@ -82,27 +44,25 @@
       },
       created(){
         let vm = this;
-        this.$http.get('http://localhost:9099/api/videos/new').then((response)=>{
-          vm.newVideos = response.data;
-        });
-         this.$http.get('http://localhost:9099/api/users/currUser').then((response)=>{
-          this.currUserId = response.data.objectId;
-          return
-        });
+
       },
 
       mounted(){
-        //更新DOM
-        this.$nextTick(()=>{
-          if(!this.scroll){
-            this.scroll = new BScroll(this.$refs.contentWrapper,{
-              click:true
-            })
-          }else{
-            this.scroll.refresh();
-          };
+        this.$http.get('/videos/new').then((response)=>{
+          this.newVideos = response.data;
+          this.$nextTick(()=>{
+            if(!this.scroll){
+              this.scroll = new BScroll(this.$refs.contentWrapper,{
+                click:true,
+                // cancelable: true,
+              })
+            }else{
+              this.scroll.refresh();
+            };
 
-        })
+          })
+        });
+
       },
 components:{
   comment,
@@ -125,14 +85,15 @@ components:{
     text-align center
 
   .home
-    .content
       position fixed
       top: 56px
-      bottom 55px
+      bottom 56px
       left: 0
       width:100%
       overflow: hidden
       background #fff
+
+
      .item
         position relative
         .user

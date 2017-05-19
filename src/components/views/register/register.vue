@@ -37,7 +37,7 @@
         if (this.toastTimer) clearTimeout(this.toastTimer)
       },
       register(){
-        this.$http.post('http://localhost:9099/api/users/signup',
+        this.$http.post('/users/signup',
           {
             username: this.username,
             password: this.password

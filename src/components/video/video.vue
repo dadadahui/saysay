@@ -21,11 +21,6 @@
           <div class="iconfont icon-zancheng-copy" v-show="this.likeState"></div>
           <div class="count">{{video.likeCount}}</div>
         </div>
-        <!--<div class="dislike" @click="dislike(video,$event)">-->
-          <!--<div class="iconfont icon-fandui" v-show="!this.dislikeState"></div>-->
-          <!--<div class="iconfont icon-fandui-copy" v-show="this.dislikeState"></div>-->
-          <!--<div class="count">{{video.dislikeCount}}</div>-->
-        <!--</div>-->
       </div>
       <div class="checkComment" @click="showComments">
         Comments
